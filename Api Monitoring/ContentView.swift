@@ -33,6 +33,8 @@ struct ContentView: View {
         )
     ]
     
+    @State private var isAddButtonClicked: Bool = false
+    
     var body: some View {
         NavigationSplitView( sidebar: {
             VStack(alignment: .leading, spacing: 16) {
@@ -87,9 +89,11 @@ struct ContentView: View {
             .navigationSplitViewColumnWidth(min: 260, ideal: 260, max: 260)
         }, detail: {
                 VStack {
-                    HStack {
+                    Spacer()
+                            .frame(height: 5)
+                    HStack(alignment: .center) {
                         Button(action: {
-                            print("Clicked")
+                            isAddButtonClicked = true
                         }, label: {
                             Image(systemName: "plus")
                             Text("Add")
@@ -98,7 +102,11 @@ struct ContentView: View {
                         .controlSize(.large)
                         Spacer()
                     }
-                    .padding(12)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .popover(isPresented: $isAddButtonClicked) {
+                        AddNewUrlView(isPresented: $isAddButtonClicked)
+                    }
                     HStack {
                         TableContentView(urls: urls)
                     }
