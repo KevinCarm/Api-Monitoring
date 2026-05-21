@@ -12,6 +12,7 @@ struct AddNewUrlView: View {
     @State private var name: String = ""
     @State private var urlString: String = ""
     @State private var interval: Double = 0.5
+    @State private var description: String = ""
     
     @Binding var isPresented: Bool
     
@@ -28,8 +29,11 @@ struct AddNewUrlView: View {
             Form {
                 TextField("Nombre del servicio:", text: $name)
                 TextField("URL de la API:", text: $urlString)
-
+                TextField("Descripción:", text: $description, axis: .vertical)
+                    .lineLimit(2...4)
+        
                 HStack {
+                    Text("Interval")
                     Slider(value: $interval, in: 1...300, step: 1)
                     Text(
                         "\(interval.formatted(.number.precision(.fractionLength(0...1)))) seg"
@@ -38,6 +42,7 @@ struct AddNewUrlView: View {
                     .foregroundColor(.secondary)
                     .frame(width: 50)
                 }
+                .padding()
             }
             Spacer()
             HStack {
@@ -56,8 +61,7 @@ struct AddNewUrlView: View {
             }
         }
         .padding()
-        // CONTROL CLAVE EN MAC: Define el tamaño exacto de la tarjeta flotante
-        .frame(width: 600, height: 250)
+        .frame(width: 600, height: 280)
         }
 }
 

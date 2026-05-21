@@ -88,30 +88,29 @@ struct ContentView: View {
             .padding(.top, 16)
             .navigationSplitViewColumnWidth(min: 260, ideal: 260, max: 260)
         }, detail: {
+            HStack {
                 VStack {
                     TableContentView(urls: urls)
                 }
                 .toolbar {
                     ToolbarItem(placement: .navigation) {
-                        HStack(spacing: 6) {
-                            Image(systemName: "plus")
-                            Text("Add URL")
-                        }
-                        .font(.body)
-                        .fontWeight(.medium)
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 4)
-                        .background(Color.blue)
-                        .cornerRadius(5)
-                        .onTapGesture {
+                        Button {
                             isAddButtonClicked = true
+                        } label: {
+                            HStack(spacing: 6) {
+                                Image(systemName: "plus")
+                                Text("Add URL")
+                            }
                         }
-                        .popover(isPresented: $isAddButtonClicked) {
+                        .buttonStyle(.borderedProminent)
+                        .popover(isPresented: $isAddButtonClicked, arrowEdge: .bottom) {
                             AddNewUrlView(isPresented: $isAddButtonClicked)
                         }
                     }
                 }
+                .padding()
+                .navigationTitle("")
+            }
         })
     }
 }

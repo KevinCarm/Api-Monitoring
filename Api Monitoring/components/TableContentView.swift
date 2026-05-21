@@ -20,7 +20,7 @@ struct TableContentView: View {
             }
             TableColumn("Interval") { url in
                 Text("\(url.interval)m")
-                    .font(.caption)
+                    .font(.system(size: 12))
                     .foregroundColor(.black)
                     .frame(width: 35, height: 25)
                     .background(
@@ -66,6 +66,13 @@ struct TableContentView: View {
                 let latency = url.latency > 1000 ?
                         Double(url.latency) / 1000.0 : Double(url.latency)
                 Text("\(latency.formatted(.number.precision(.fractionLength(0...1)))) \(url.latency >= 1000 ? "min" : "ms")")
+                    .foregroundStyle(.green)
+                    .padding(.horizontal, 10)
+                    .frame(height: 25)
+                    .background(
+                        RoundedRectangle(cornerRadius: 6)
+                            .fill(.green.opacity(0.2))
+                    )
             }
         }
     }
