@@ -12,6 +12,8 @@ struct TableContentView: View {
 
     @Query var urls: [UrlModel]
     
+    @Environment(\.colorScheme) private var colorScheme
+    
     var body: some View {
         Table(urls) {
             TableColumn("Name", value: \.name)
@@ -22,7 +24,7 @@ struct TableContentView: View {
             TableColumn("Interval") { url in
                 Text("\(Int(url.interval))m")
                     .font(.system(size: 12))
-                    .foregroundColor(.black)
+                    .foregroundColor(colorScheme == .light ? .black: .white)
                     .frame(width: 35, height: 25)
                     .background(
                         RoundedRectangle(cornerRadius: 6)

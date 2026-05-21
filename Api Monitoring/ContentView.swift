@@ -11,6 +11,7 @@ import SwiftData
 struct ContentView: View {
     
     @State private var isAddButtonClicked: Bool = false
+    @Query var urls: [UrlModel]
     
     var body: some View {
         NavigationSplitView( sidebar: {
@@ -25,7 +26,7 @@ struct ContentView: View {
                 .padding(.leading, 12)
                 NavigationViewItem(
                     icon: "display",
-                    count: 15,
+                    count: urls.count,
                     title: "All monitors",
                     imageForeground: .gray
                 )
@@ -42,19 +43,19 @@ struct ContentView: View {
                 .padding(.leading, 12)
                 NavigationViewItem(
                     icon: "circle",
-                    count: 3,
+                    count: urls.filter{ $0.lastStatus == .UP }.count,
                     title: "Up",
                     imageForeground: .green
                 )
                 NavigationViewItem(
                     icon: "exclamationmark.triangle",
-                    count: 10,
+                    count: urls.filter{ $0.lastStatus == .Warning }.count,
                     title: "Warning",
                     imageForeground: .yellow
                 )
                 NavigationViewItem(
                     icon: "x.circle",
-                    count: 2,
+                    count: urls.filter{ $0.lastStatus == .Down }.count,
                     title: "Down",
                     imageForeground: .red
                 )
