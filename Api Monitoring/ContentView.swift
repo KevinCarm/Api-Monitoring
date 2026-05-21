@@ -9,6 +9,30 @@ import SwiftUI
 
 struct ContentView: View {
     
+    let urls =  [
+        UrlModel(
+            name: "Api Gateway",
+            url: "https://api.acme.com",
+            interval: 1,
+            lastStatus: .UP,
+            latency: 120
+        ),
+        UrlModel(
+            name: "Report Service",
+            url: "https://report.acme.com",
+            interval: 2,
+            lastStatus: .Down,
+            latency: 1210
+        ),
+        UrlModel(
+            name: "Search Service",
+            url: "https://search.acme.com",
+            interval: 4,
+            lastStatus: .Warning,
+            latency: 140
+        )
+    ]
+    
     var body: some View {
         NavigationSplitView( sidebar: {
             VStack(alignment: .leading, spacing: 16) {
@@ -24,7 +48,7 @@ struct ContentView: View {
                     icon: "display",
                     count: 15,
                     title: "All monitors",
-                    imageForeground: .white
+                    imageForeground: .gray
                 )
                 
                 Divider()
@@ -61,13 +85,29 @@ struct ContentView: View {
             .padding(.horizontal, 8)
             .padding(.top, 16)
             .navigationSplitViewColumnWidth(min: 260, ideal: 260, max: 260)
-        },
- detail: {
-            
+        }, detail: {
+                VStack {
+                    HStack {
+                        Button(action: {
+                            print("Clicked")
+                        }, label: {
+                            Image(systemName: "plus")
+                            Text("Add")
+                        })
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.large)
+                        Spacer()
+                    }
+                    .padding(12)
+                    HStack {
+                        TableContentView(urls: urls)
+                    }
+            }
         })
     }
 }
 
 #Preview {
     ContentView()
+        .frame(minWidth: 800, minHeight: 500)
 }

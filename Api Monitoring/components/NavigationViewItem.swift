@@ -35,10 +35,10 @@ struct NavigationViewItem: View {
                 .font(.caption)
                 .fontWeight(.bold)
                 .foregroundColor(.white)
-                .frame(width: 28, height: 28)
+                .frame(width: 25, height: 25)
                 .background(
                     Circle()
-                        .fill(Color.gray.opacity(0.3))
+                        .fill(Color.gray.opacity(0.6))
                 )
         }
         .padding(.horizontal)
