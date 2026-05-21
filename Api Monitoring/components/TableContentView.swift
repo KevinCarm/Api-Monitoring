@@ -6,20 +6,21 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct TableContentView: View {
-    
-    @State var urls: [UrlModel]
+
+    @Query var urls: [UrlModel]
     
     var body: some View {
         Table(urls) {
             TableColumn("Name", value: \.name)
             TableColumn("URL") { url in
                 Text(url.url)
-                    .foregroundStyle(.gray.opacity(0.9))
+                    .foregroundStyle(.gray.opacity(1))
             }
             TableColumn("Interval") { url in
-                Text("\(url.interval)m")
+                Text("\(Int(url.interval))m")
                     .font(.system(size: 12))
                     .foregroundColor(.black)
                     .frame(width: 35, height: 25)
@@ -79,29 +80,5 @@ struct TableContentView: View {
 }
 
 #Preview {
-    TableContentView(
-        urls: [
-            UrlModel(
-                name: "Api Gateway",
-                url: "https://api.acme.com",
-                interval: 1,
-                lastStatus: .UP,
-                latency: 120
-            ),
-            UrlModel(
-                name: "Report Service",
-                url: "https://report.acme.com",
-                interval: 2,
-                lastStatus: .Down,
-                latency: 1210
-            ),
-            UrlModel(
-                name: "Search Service",
-                url: "https://search.acme.com",
-                interval: 4,
-                lastStatus: .Warning,
-                latency: 140
-            )
-        ]
-    )
+    TableContentView()
 }

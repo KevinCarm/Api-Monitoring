@@ -6,21 +6,24 @@
 //
 
 import Foundation
+import SwiftData
 
-struct UrlModel: Identifiable {
-    var id: UUID
+@Model class UrlModel: Identifiable {
+    var id =  UUID()
     var name: String
     var url: String
-    var interval: Int
+    var interval: Double
     var lastStatus: Status
     var latency: Int
+    var note: String
     
     init(
         name: String,
         url: String,
-        interval: Int,
+        interval: Double,
         lastStatus: Status,
-        latency: Int
+        latency: Int,
+        note: String
     ) {
         self.id = UUID()
         self.name = name
@@ -28,10 +31,11 @@ struct UrlModel: Identifiable {
         self.interval = interval
         self.lastStatus = lastStatus
         self.latency = latency
+        self.note = note
     }
 }
 
-enum Status: String {
+enum Status: String, Codable {
     case UP = "Up"
     case Warning = "Warning"
     case Down = "Down"

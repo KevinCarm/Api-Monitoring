@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct Api_MonitoringApp: App {
@@ -13,5 +14,6 @@ struct Api_MonitoringApp: App {
         WindowGroup {
             ContentView()
         }
+        .modelContainer(for: UrlModel.self)
     }
 }

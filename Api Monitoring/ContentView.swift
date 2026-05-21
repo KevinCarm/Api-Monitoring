@@ -6,32 +6,9 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
-    
-    let urls =  [
-        UrlModel(
-            name: "Api Gateway",
-            url: "https://api.acme.com",
-            interval: 1,
-            lastStatus: .UP,
-            latency: 120
-        ),
-        UrlModel(
-            name: "Report Service",
-            url: "https://report.acme.com",
-            interval: 2,
-            lastStatus: .Down,
-            latency: 1210
-        ),
-        UrlModel(
-            name: "Search Service",
-            url: "https://search.acme.com",
-            interval: 4,
-            lastStatus: .Warning,
-            latency: 140
-        )
-    ]
     
     @State private var isAddButtonClicked: Bool = false
     
@@ -90,7 +67,7 @@ struct ContentView: View {
         }, detail: {
             HStack {
                 VStack {
-                    TableContentView(urls: urls)
+                    TableContentView()
                 }
                 .toolbar {
                     ToolbarItem(placement: .navigation) {
@@ -116,6 +93,8 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView()
-        .frame(minWidth: 800, minHeight: 500)
+    let config = ModelConfiguration(isStoredInMemoryOnly: true)
+    let container = try! ModelContainer(for: UrlModel.self, configurations: config)
+    return ContentView()
+        .modelContainer(container)
 }

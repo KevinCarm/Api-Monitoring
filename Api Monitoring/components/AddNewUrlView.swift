@@ -6,13 +6,17 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct AddNewUrlView: View {
+    
+    @Environment(\.modelContext) private var modelContext
     
     @State private var name: String = ""
     @State private var urlString: String = ""
     @State private var interval: Double = 0.5
     @State private var description: String = ""
+    
     
     @Binding var isPresented: Bool
     
@@ -23,13 +27,13 @@ struct AddNewUrlView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Añadir Nuevo Endpoint")
+            Text("Add new Endpoint")
                 .font(.headline)
             
             Form {
-                TextField("Nombre del servicio:", text: $name)
-                TextField("URL de la API:", text: $urlString)
-                TextField("Descripción:", text: $description, axis: .vertical)
+                TextField("Service Name:", text: $name)
+                TextField("URL:", text: $urlString)
+                TextField("Descripction:", text: $description, axis: .vertical)
                     .lineLimit(2...4)
         
                 HStack {
@@ -48,13 +52,15 @@ struct AddNewUrlView: View {
             HStack {
                 Spacer()
 
-                Button("Cancelar") {
+                Button("Cancel") {
                     isPresented = false
                 }
                 .buttonStyle(.plain)
 
-                Button("Guardar") {
-                    print("Guardando: \(name) - \(urlString)")
+                Button("Save") {
+                        let model = UrlModel(name: name, url: urlString, interval: interval, lastStatus: .UP, latency: 0, note: description)
+                        modelContext.insert(model)
+                        try? modelContext.save()
                     isPresented = false
                 }
                 .buttonStyle(.borderedProminent)
@@ -66,5 +72,8 @@ struct AddNewUrlView: View {
 }
 
 #Preview {
-    AddNewUrlView(isPresented: .constant(false))
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        let container = try! ModelContainer(for: UrlModel.self, configurations: config)
+        return AddNewUrlView(isPresented: .constant(true))
+            .modelContainer(container)
 }
