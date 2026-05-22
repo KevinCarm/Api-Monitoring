@@ -6,19 +6,96 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
+    
+    @State private var isAddButtonClicked: Bool = false
+    @Query var urls: [UrlModel]
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
-        }
-        .padding()
+        NavigationSplitView( sidebar: {
+            VStack(alignment: .leading, spacing: 16) {
+                HStack {
+                    Text("PROJECTS")
+                        .font(.title3)
+                        .fontWeight(.bold)
+                        .foregroundColor(.gray)
+                    Spacer()
+                }
+                .padding(.leading, 12)
+                NavigationViewItem(
+                    icon: "display",
+                    count: urls.count,
+                    title: "All monitors",
+                    imageForeground: .gray
+                )
+                
+                Divider()
+                
+                HStack {
+                    Text("STATUS")
+                        .font(.title3)
+                        .fontWeight(.bold)
+                        .foregroundColor(.gray)
+                    Spacer()
+                }
+                .padding(.leading, 12)
+                NavigationViewItem(
+                    icon: "circle",
+                    count: urls.filter{ $0.lastStatus == .Up }.count,
+                    title: "Up",
+                    imageForeground: .green
+                )
+                NavigationViewItem(
+                    icon: "exclamationmark.triangle",
+                    count: urls.filter{ $0.lastStatus == .Warning }.count,
+                    title: "Warning",
+                    imageForeground: .yellow
+                )
+                NavigationViewItem(
+                    icon: "x.circle",
+                    count: urls.filter{ $0.lastStatus == .Down }.count,
+                    title: "Down",
+                    imageForeground: .red
+                )
+                
+                Spacer()
+            }
+            .padding(.horizontal, 8)
+            .padding(.top, 16)
+            .navigationSplitViewColumnWidth(min: 260, ideal: 260, max: 260)
+        }, detail: {
+            HStack {
+                VStack {
+                    TableContentView()
+                }
+                .toolbar {
+                    ToolbarItem(placement: .navigation) {
+                        Button {
+                            isAddButtonClicked = true
+                        } label: {
+                            HStack(spacing: 6) {
+                                Image(systemName: "plus")
+                                Text("Add URL")
+                            }
+                        }
+                        .buttonStyle(.borderedProminent)
+                    }
+                }
+                .padding()
+                .navigationTitle("")
+            }
+            .popover(isPresented: $isAddButtonClicked, arrowEdge: .bottom) {
+                AddNewUrlView(isPresented: $isAddButtonClicked)
+            }
+        })
     }
 }
 
 #Preview {
-    ContentView()
+    let config = ModelConfiguration(isStoredInMemoryOnly: true)
+    let container = try! ModelContainer(for: UrlModel.self, configurations: config)
+    return ContentView()
+        .modelContainer(container)
 }
