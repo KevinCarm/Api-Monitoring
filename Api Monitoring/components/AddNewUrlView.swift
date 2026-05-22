@@ -38,10 +38,11 @@ struct AddNewUrlView: View {
         
                 HStack {
                     Text("Interval")
-                    Slider(value: $interval, in: 1...300, step: 1)
-                    Text(
-                        "\(interval.formatted(.number.precision(.fractionLength(0...1)))) seg"
-                    )
+                    Slider(value: $interval, in: 0...300, step: 1)
+                    
+                    let intervalValue = "\(interval.formatted(.number.precision(.fractionLength(0...1)))) seg"
+                    
+                    Text(intervalValue)
                     .font(.callout)
                     .foregroundColor(.secondary)
                     .frame(width: 50)

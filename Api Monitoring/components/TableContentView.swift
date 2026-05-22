@@ -17,10 +17,7 @@ struct TableContentView: View {
     var body: some View {
         Table(urls) {
             TableColumn("Name", value: \.name)
-            TableColumn("URL") { url in
-                Text(url.url)
-                    .foregroundStyle(.gray.opacity(1))
-            }
+            TableColumn("URL", value: \.url)
             TableColumn("Interval") { url in
                 Text("\(Int(url.interval))m")
                     .font(.system(size: 12))
@@ -68,6 +65,7 @@ struct TableContentView: View {
             TableColumn("Latency") { url in
                 let latency = url.latency > 1000 ?
                         Double(url.latency) / 1000.0 : Double(url.latency)
+                
                 Text("\(latency.formatted(.number.precision(.fractionLength(0...1)))) \(url.latency >= 1000 ? "min" : "ms")")
                     .foregroundStyle(.green)
                     .padding(.horizontal, 10)
