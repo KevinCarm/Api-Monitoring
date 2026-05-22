@@ -16,7 +16,17 @@ struct TableContentView: View {
     
     var body: some View {
         Table(urls) {
-            TableColumn("Name", value: \.name)
+            TableColumn("Name") { url in
+                HStack(spacing: 10) {
+                    Button {
+                        print("Clicking")
+                    } label: {
+                        Image(systemName: "play.fill")
+                            .foregroundStyle(.green)
+                    }
+                    Text(url.name)
+                }
+            }
             TableColumn("URL", value: \.url)
             TableColumn("Interval") { url in
                 Text("\(Int(url.interval))m")
@@ -66,19 +76,31 @@ struct TableContentView: View {
                 let latency = url.latency > 1000 ?
                         Double(url.latency) / 1000.0 : Double(url.latency)
                 
-                Text("\(latency.formatted(.number.precision(.fractionLength(0...1)))) \(url.latency >= 1000 ? "min" : "ms")")
-                    .foregroundStyle(.green)
-                    .padding(.horizontal, 10)
-                    .frame(height: 25)
-                    .background(
-                        RoundedRectangle(cornerRadius: 6)
-                            .fill(.green.opacity(0.2))
-                    )
+                HStack(spacing: 10) {
+                    Text("\(latency.formatted(.number.precision(.fractionLength(0...1)))) \(url.latency >= 1000 ? "min" : "ms")")
+                        .foregroundStyle(.green)
+                        .padding(.horizontal, 10)
+                        .frame(height: 25)
+                        .background(
+                            RoundedRectangle(cornerRadius: 6)
+                                .fill(.green.opacity(0.2))
+                        )
+                    Spacer()
+                    Button {
+                        
+                    } label: {
+                        Image(systemName: "trash")
+                    }
+                }
             }
         }
     }
 }
 
 #Preview {
-    TableContentView()
+    let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        let container = try! ModelContainer(for: UrlModel.self, configurations: config)
+    let url = UrlModel(name: "Pokemon Api", url: "https://pokeapi.co/api/v2/pokemon/ditto", interval: 1.0, lastStatus: .Up, latency: 123, note: "")
+    container.mainContext.insert(url)
+    return TableContentView().modelContainer(container)
 }

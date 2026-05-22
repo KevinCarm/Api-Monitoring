@@ -14,7 +14,7 @@ struct AddNewUrlView: View {
     
     @State private var name: String = ""
     @State private var urlString: String = ""
-    @State private var interval: Double = 0.5
+    @State private var interval: Double = 1.0
     @State private var description: String = ""
     
     private var apiCallUtil = ApiCallUtil()
@@ -35,12 +35,15 @@ struct AddNewUrlView: View {
             Form {
                 TextField("Service Name:", text: $name)
                 TextField("URL:", text: $urlString)
-                TextField("Descripction:", text: $description, axis: .vertical)
+                TextField("Description:", text: $description, axis: .vertical)
                     .lineLimit(2...4)
         
                 HStack {
                     Text("Interval")
                     Slider(value: $interval, in: 0...300, step: 1)
+                        .tint(.purple)
+                        .controlSize(.small)
+                        .cornerRadius(4)
                     
                     let intervalValue = "\(interval.formatted(.number.precision(.fractionLength(0...1)))) seg"
                     
