@@ -41,7 +41,7 @@ struct TableContentView: View {
                         .foregroundStyle(.red)
                     
                     switch(url.lastStatus) {
-                    case .UP:
+                    case .Up:
                         upImage
                     case .Warning:
                         warningImage
@@ -55,7 +55,7 @@ struct TableContentView: View {
                 .background(
                     RoundedRectangle(cornerRadius: 6)
                         .fill(
-                            url.lastStatus == .UP ? .green
+                            url.lastStatus == .Up ? .green
                                 .opacity(
                                     0.2
                                 ) : url.lastStatus == .Warning ? .yellow.opacity(

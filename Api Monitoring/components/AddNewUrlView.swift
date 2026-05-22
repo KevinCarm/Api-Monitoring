@@ -58,7 +58,14 @@ struct AddNewUrlView: View {
                 .buttonStyle(.plain)
 
                 Button("Save") {
-                        let model = UrlModel(name: name, url: urlString, interval: interval, lastStatus: .UP, latency: 0, note: description)
+                    let model = UrlModel(
+                        name: name,
+                        url: urlString,
+                        interval: interval,
+                        lastStatus: .Up,
+                        latency: 0,
+                        note: description
+                    )
                         modelContext.insert(model)
                         try? modelContext.save()
                     isPresented = false

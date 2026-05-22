@@ -43,7 +43,7 @@ struct ContentView: View {
                 .padding(.leading, 12)
                 NavigationViewItem(
                     icon: "circle",
-                    count: urls.filter{ $0.lastStatus == .UP }.count,
+                    count: urls.filter{ $0.lastStatus == .Up }.count,
                     title: "Up",
                     imageForeground: .green
                 )

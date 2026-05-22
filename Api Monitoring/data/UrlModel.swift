@@ -36,7 +36,7 @@ import SwiftData
 }
 
 enum Status: String, Codable {
-    case UP = "Up"
-    case Warning = "Warning"
-    case Down = "Down"
+    case Up
+    case Warning
+    case Down
 }

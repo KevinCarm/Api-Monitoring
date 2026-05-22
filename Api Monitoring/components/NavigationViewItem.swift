@@ -10,7 +10,7 @@ import SwiftUI
 struct NavigationViewItem: View {
     
     public var icon: String
-    @State public var count: Int
+    public var count: Int
     public var title: String
     public var imageForeground: Color
     
