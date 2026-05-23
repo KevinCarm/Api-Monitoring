@@ -13,17 +13,23 @@ struct TableContentView: View {
     @Query var urls: [UrlModel]
     
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.modelContext) private var modelContext
+    
+    @State private var isRunning: Bool = true
+    @State private var apiCallUtil: ApiCallUtil?
     
     var body: some View {
         Table(urls) {
             TableColumn("Name") { url in
                 HStack(spacing: 10) {
                     Button {
-                        print("Clicking")
+                        updateIsRunning(isRunning: isRunning, url: url.url)
+                        isRunning.toggle()
                     } label: {
-                        Image(systemName: "play.fill")
+                        Image(systemName: url.isRunning ? "pause.fill" : "play.fill")
                             .foregroundStyle(.green)
                     }
+                    .buttonStyle(.plain)
                     Text(url.name)
                 }
             }
@@ -46,6 +52,8 @@ struct TableContentView: View {
                         .foregroundStyle(.yellow)
                     let downImage = Image(systemName: "x.circle.fill")
                         .foregroundStyle(.red)
+                    let pauseImage = Image(systemName: "pause.fill")
+                        .foregroundStyle(.gray)
                     
                     switch(url.lastStatus) {
                     case .Up:
@@ -54,6 +62,8 @@ struct TableContentView: View {
                         warningImage
                     case .Down:
                         downImage
+                    case .Pause:
+                        pauseImage
                     }
                     Text(url.lastStatus.rawValue)
                 }
@@ -88,12 +98,36 @@ struct TableContentView: View {
                         )
                     Spacer()
                     Button {
-                        
+                        Task {
+                            await apiCallUtil?.deleteTask(for: url.url)
+                            print("Deleted")
+                        }
                     } label: {
                         Image(systemName: "trash")
                     }
                 }
             }
+        }
+        .onAppear {
+            let container = modelContext.container
+            let apiCallUtil = ApiCallUtil(modelContainer: container)
+            self.apiCallUtil = apiCallUtil
+        }
+    }
+    
+    private func updateIsRunning(isRunning: Bool, url: String) {
+        let context = modelContext
+        
+        let descriptor = FetchDescriptor<UrlModel>(
+            predicate: #Predicate { $0.url == url}
+        )
+        if let exists = try? context.fetch(descriptor).first {
+            if isRunning {
+                exists.isRunning = false
+            } else {
+                exists.isRunning = true
+            }
+            try? context.save()
         }
     }
 }

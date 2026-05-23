@@ -15,6 +15,7 @@ import SwiftData
     var lastStatus: Status
     var latency: [Int]
     var note: String
+    var isRunning: Bool
     
     init(
         name: String,
@@ -22,7 +23,8 @@ import SwiftData
         interval: Double,
         lastStatus: Status,
         latency: [Int] = [],
-        note: String
+        note: String,
+        isRunning: Bool = true
     ) {
         self.name = name
         self.url = url
@@ -30,6 +32,7 @@ import SwiftData
         self.lastStatus = lastStatus
         self.latency = latency
         self.note = note
+        self.isRunning = isRunning
     }
 }
 
@@ -37,4 +40,5 @@ enum Status: String, Codable {
     case Up
     case Warning
     case Down
+    case Pause
 }

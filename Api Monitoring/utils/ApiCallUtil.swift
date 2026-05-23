@@ -27,7 +27,8 @@ import SwiftData
                     let status = (response as? HTTPURLResponse)?.statusCode ?? 0
                     let latencySeg = endTime.timeIntervalSince(startTime)
                     let latencyMill = latencySeg * 1000
-                    
+                    print(urlString)
+                    print("\(latencyMill)ms")
                     self.updateUrlData(url: urlString, status: status, latency: Int(latencyMill))
                     try await Task.sleep(for: .seconds(seconds))
                 } catch {
@@ -74,6 +75,24 @@ import SwiftData
     private func stopMonitoring(for url: String) {
         activeTasks[url]?.cancel()
         activeTasks.removeValue(forKey: url)
+    }
+    
+    func deleteTask(for url: String) {
+        print(url)
+        activeTasks[url]?.cancel()
+        activeTasks.removeValue(forKey: url)
+        
+        let context = modelContext
+        let targetUrl = url
+        
+        let descriptor = FetchDescriptor<UrlModel>(
+            predicate: #Predicate { $0.url == targetUrl }
+        )
+        
+        if let exists = try? context.fetch(descriptor).first {
+            context.delete(exists)
+            try? context.save()
+        }
     }
     
     func stopAllTasks() {

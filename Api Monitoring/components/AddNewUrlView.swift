@@ -23,7 +23,7 @@ struct AddNewUrlView: View {
     @Binding var isPresented: Bool
     
     public init(isPresented: Binding<Bool>) {
-            self._isPresented = isPresented
+        self._isPresented = isPresented
     }
     
     
