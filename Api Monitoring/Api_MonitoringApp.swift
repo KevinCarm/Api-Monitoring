@@ -16,9 +16,26 @@ struct Api_MonitoringApp: App {
         do {
             container = try ModelContainer(for: UrlModel.self)
         } catch {
-            fatalError("No se pudo inicializar el contenedor")
+            
+            let urls = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)
+            if let appSupportURL = urls.first {
+                let databaseURL = appSupportURL.appendingPathComponent("default.store")
+                let shmURL = appSupportURL.appendingPathComponent("default.store-shm")
+                let walURL = appSupportURL.appendingPathComponent("default.store-wal")
+                
+                try? FileManager.default.removeItem(at: databaseURL)
+                try? FileManager.default.removeItem(at: shmURL)
+                try? FileManager.default.removeItem(at: walURL)
+            }
+            
+            do {
+                container = try ModelContainer(for: UrlModel.self)
+            } catch {
+                fatalError("Error crítico e irrecuperable: \(error.localizedDescription)")
+            }
         }
     }
+    
     var body: some Scene {
         WindowGroup {
             ContentView()

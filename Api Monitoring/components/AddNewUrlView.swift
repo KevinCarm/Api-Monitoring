@@ -17,7 +17,7 @@ struct AddNewUrlView: View {
     @State private var interval: Double = 1.0
     @State private var description: String = ""
     
-    private var apiCallUtil = ApiCallUtil()
+    @State private var apiCallUtil: ApiCallUtil?
     
     
     @Binding var isPresented: Bool
@@ -69,23 +69,29 @@ struct AddNewUrlView: View {
                         url: urlString,
                         interval: interval,
                         lastStatus: .Up,
-                        latency: 0,
+                        latency: [],
                         note: description
                     )
                     modelContext.insert(model)
                     try? modelContext.save()
                     
-                    apiCallUtil
-                        .startMonitoringApi(
-                            for: urlString,
-                            each: interval,
-                            method: "GET"
-                        )
+                    Task {
+                        await apiCallUtil?.startMonitoringApi(
+                                for: urlString,
+                                each: interval,
+                                method: "GET"
+                            )
+                    }
                     
                     isPresented = false
                 }
                 .buttonStyle(.borderedProminent)
             }
+        }
+        .onAppear {
+            let container = modelContext.container
+            let apiCallUtil = ApiCallUtil(modelContainer: container)
+            self.apiCallUtil = apiCallUtil
         }
         .padding()
         .frame(width: 600, height: 280)

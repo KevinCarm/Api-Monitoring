@@ -6,8 +6,9 @@
 //
 
 import Foundation
+import SwiftData
 
-class ApiCallUtil {
+@ModelActor actor ApiCallUtil {
     private var activeTasks: [String: Task<Void, Never>] = [:]
     
     func startMonitoringApi(for urlString: String, each seconds: Double, method: String) {
@@ -24,11 +25,10 @@ class ApiCallUtil {
                     let (_, response) = try await URLSession.shared.data(for: request)
                     let endTime = Date()
                     let status = (response as? HTTPURLResponse)?.statusCode ?? 0
-                    print("🔢 API [\(urlString)] -> Status: \(status)")
                     let latencySeg = endTime.timeIntervalSince(startTime)
                     let latencyMill = latencySeg * 1000
-                    print("\(Int(latencyMill))ms")
                     
+                    self.updateUrlData(url: urlString, status: status, latency: Int(latencyMill))
                     try await Task.sleep(for: .seconds(seconds))
                 } catch {
                     break
@@ -38,8 +38,50 @@ class ApiCallUtil {
         activeTasks[urlString] = newTask
     }
     
-    func stopMonitoring(for url: String) {
+    private func updateUrlData(url: String, status: Int, latency: Int) {
+        let context = modelContext
+        
+        let descriptor = FetchDescriptor<UrlModel>(
+            predicate: #Predicate { $0.url == url }
+        )
+        
+        do {
+            if let existData = try context.fetch(descriptor).first {
+                var statusEnum: Status? = .Down
+                if [200, 201, 204].contains(status) {
+                    statusEnum = .Up
+                } else if [203, 299, 429].contains(status) || latency > 500 {
+                    statusEnum = .Warning
+                }
+                existData.lastStatus = statusEnum!
+                var historial = existData.latency
+                historial.append(latency)
+                if historial.count > 30 {
+                    historial.removeFirst()
+                }
+                existData.latency = historial
+                
+                if context.hasChanges {
+                    try context.save()
+                }
+            }
+        } catch {
+            
+        }
+    }
+    
+    
+    private func stopMonitoring(for url: String) {
         activeTasks[url]?.cancel()
         activeTasks.removeValue(forKey: url)
+    }
+    
+    func stopAllTasks() {
+        for task in activeTasks.values {
+            if !task.isCancelled {
+                task.cancel()
+            }
+        }
+        activeTasks.removeAll()
     }
 }

@@ -81,13 +81,13 @@ struct ContentView: View {
                             }
                         }
                         .buttonStyle(.borderedProminent)
+                        .popover(isPresented: $isAddButtonClicked, arrowEdge: .bottom) {
+                            AddNewUrlView(isPresented: $isAddButtonClicked)
+                        }
                     }
                 }
                 .padding()
                 .navigationTitle("")
-            }
-            .popover(isPresented: $isAddButtonClicked, arrowEdge: .bottom) {
-                AddNewUrlView(isPresented: $isAddButtonClicked)
             }
         })
     }

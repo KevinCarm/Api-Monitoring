@@ -8,13 +8,12 @@
 import Foundation
 import SwiftData
 
-@Model class UrlModel: Identifiable {
-    var id =  UUID()
+@Model class UrlModel {
     var name: String
-    var url: String
+    @Attribute(.unique) var url: String
     var interval: Double
     var lastStatus: Status
-    var latency: Int
+    var latency: [Int]
     var note: String
     
     init(
@@ -22,10 +21,9 @@ import SwiftData
         url: String,
         interval: Double,
         lastStatus: Status,
-        latency: Int,
+        latency: [Int] = [],
         note: String
     ) {
-        self.id = UUID()
         self.name = name
         self.url = url
         self.interval = interval
