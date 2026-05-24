@@ -12,6 +12,7 @@ import SwiftData
     private var activeTasks: [String: Task<Void, Never>] = [:]
     
     func startMonitoringApi(for urlString: String, each seconds: Double, method: String) {
+        print(urlString)
         stopMonitoring(for: urlString)
         
         let newTask = Task {
@@ -72,7 +73,7 @@ import SwiftData
     }
     
     
-    private func stopMonitoring(for url: String) {
+    func stopMonitoring(for url: String) {
         activeTasks[url]?.cancel()
         activeTasks.removeValue(forKey: url)
     }

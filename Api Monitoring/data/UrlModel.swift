@@ -13,9 +13,19 @@ import SwiftData
     @Attribute(.unique) var url: String
     var interval: Double
     var lastStatus: Status
-    var latency: [Int]
+    private var latencyData: Data = Data()
     var note: String
     var isRunning: Bool
+    
+    @Transient var latency: [Int] {
+        get {
+            (try? JSONDecoder().decode([Int].self, from: latencyData)) ?? []
+        } set {
+            if let encoded = try? JSONEncoder().encode(newValue) {
+                latencyData = encoded
+            }
+        }
+    }
     
     init(
         name: String,
@@ -30,15 +40,18 @@ import SwiftData
         self.url = url
         self.interval = interval
         self.lastStatus = lastStatus
-        self.latency = latency
         self.note = note
         self.isRunning = isRunning
+        
+        if let encoded = try? JSONEncoder().encode(latency) {
+            self.latencyData = encoded
+        }
     }
 }
 
 enum Status: String, Codable {
-    case Up
-    case Warning
-    case Down
-    case Pause
+    case Up = "Up"
+    case Warning = "Warning"
+    case Down = "Down"
+    case Pause = "Pause"
 }

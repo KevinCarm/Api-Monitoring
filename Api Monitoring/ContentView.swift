@@ -11,7 +11,10 @@ import SwiftData
 struct ContentView: View {
     
     @State private var isAddButtonClicked: Bool = false
+    
     @Query var urls: [UrlModel]
+    
+    @Environment(\.modelContext) private var modelContext
     
     var body: some View {
         NavigationSplitView( sidebar: {
@@ -90,6 +93,12 @@ struct ContentView: View {
                 .navigationTitle("")
             }
         })
+        .onDisappear {
+            for url in urls {
+                url.isRunning = false
+            }
+            try? modelContext.save()
+        }
     }
 }
 

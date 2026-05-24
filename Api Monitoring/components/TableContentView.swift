@@ -14,8 +14,7 @@ struct TableContentView: View {
     
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.modelContext) private var modelContext
-    
-    @State private var isRunning: Bool = true
+
     @State private var apiCallUtil: ApiCallUtil?
     
     var body: some View {
@@ -23,8 +22,7 @@ struct TableContentView: View {
             TableColumn("Name") { url in
                 HStack(spacing: 10) {
                     Button {
-                        updateIsRunning(isRunning: isRunning, url: url.url)
-                        isRunning.toggle()
+                        updateIsRunning(url: url.url)
                     } label: {
                         Image(systemName: url.isRunning ? "pause.fill" : "play.fill")
                             .foregroundStyle(.green)
@@ -115,17 +113,29 @@ struct TableContentView: View {
         }
     }
     
-    private func updateIsRunning(isRunning: Bool, url: String) {
+    private func updateIsRunning(url: String) {
         let context = modelContext
         
         let descriptor = FetchDescriptor<UrlModel>(
             predicate: #Predicate { $0.url == url}
         )
         if let exists = try? context.fetch(descriptor).first {
-            if isRunning {
+            print(exists.isRunning)
+            if exists.isRunning {
                 exists.isRunning = false
+                Task {
+                    await apiCallUtil?.stopMonitoring(for: url)
+                }
             } else {
                 exists.isRunning = true
+                Task {
+                    await apiCallUtil?
+                        .startMonitoringApi(
+                            for: url,
+                            each: exists.interval,
+                            method: "GET"
+                        )
+                }
             }
             try? context.save()
         }
