@@ -55,17 +55,32 @@ import SwiftData
                 } else if [203, 299, 429].contains(status) || latency > 500 {
                     statusEnum = .Warning
                 }
-                existData.lastStatus = statusEnum!
-                var historial = existData.latency
-                historial.append(latency)
-                if historial.count > 30 {
-                    historial.removeFirst()
-                }
-                existData.latency = historial
                 
-                if context.hasChanges {
-                    try context.save()
+                let newPing = PingRecord(
+                    latency: Double(latency), statusCode: status
+                )
+                newPing.urlModel = existData
+                context.insert(newPing)
+                
+                existData.lastStatus = statusEnum!
+                
+                let idURL = existData.persistentModelID
+                var descriptor = FetchDescriptor<PingRecord>(
+                    predicate: #Predicate { $0.urlModel?.persistentModelID == idURL }
+                )
+                if let total = try? context.fetchCount(descriptor), total > 5000 {
+                    descriptor.sortBy = [
+                        SortDescriptor(\PingRecord.timestamp, order: .forward)
+                    ]
+                    descriptor.fetchLimit = total - 5000
+
+                    if let exced = try? context.fetch(descriptor) {
+                        for oldPing in exced {
+                            context.delete(oldPing)
+                        }
+                    }
                 }
+                try? context.save()
             }
         } catch {
             

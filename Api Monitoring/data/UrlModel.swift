@@ -17,22 +17,14 @@ import SwiftData
     var note: String
     var isRunning: Bool
     
-    @Transient var latency: [Int] {
-        get {
-            (try? JSONDecoder().decode([Int].self, from: latencyData)) ?? []
-        } set {
-            if let encoded = try? JSONEncoder().encode(newValue) {
-                latencyData = encoded
-            }
-        }
-    }
+    @Relationship(deleteRule: .cascade, inverse: \PingRecord.urlModel)
+    var history: [PingRecord] = []
     
     init(
         name: String,
         url: String,
         interval: Double,
         lastStatus: Status,
-        latency: [Int] = [],
         note: String,
         isRunning: Bool = true
     ) {
@@ -42,10 +34,6 @@ import SwiftData
         self.lastStatus = lastStatus
         self.note = note
         self.isRunning = isRunning
-        
-        if let encoded = try? JSONEncoder().encode(latency) {
-            self.latencyData = encoded
-        }
     }
 }
 

@@ -81,7 +81,11 @@ struct TableContentView: View {
                 )
             }
             TableColumn("Latency") { url in
-                let averageLatency = url.latency.reduce(0, +) / (url.latency.count == 0 ? 1 : url.latency.count)
+                let count = url.history.count
+                let latencySum: Double = url.history.reduce(0.0) {(adding, val) -> Double in
+                    return adding + val.latency
+                }
+                let averageLatency = Int(latencySum) / (count == 0 ? 1 : count)
                 let latency = averageLatency > 1000 ?
                         Double(averageLatency) / 1000.0 : Double(averageLatency)
                 
@@ -145,7 +149,7 @@ struct TableContentView: View {
 #Preview {
     let config = ModelConfiguration(isStoredInMemoryOnly: true)
         let container = try! ModelContainer(for: UrlModel.self, configurations: config)
-    let url = UrlModel(name: "Pokemon Api", url: "https://pokeapi.co/api/v2/pokemon/ditto", interval: 1.0, lastStatus: .Up, latency: [123, 100, 130], note: "")
+    let url = UrlModel(name: "Pokemon Api", url: "https://pokeapi.co/api/v2/pokemon/ditto", interval: 1.0, lastStatus: .Up, note: "")
     container.mainContext.insert(url)
     return TableContentView().modelContainer(container)
 }

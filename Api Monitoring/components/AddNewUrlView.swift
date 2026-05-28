@@ -69,7 +69,6 @@ struct AddNewUrlView: View {
                         url: urlString,
                         interval: interval,
                         lastStatus: .Up,
-                        latency: [],
                         note: description
                     )
                     modelContext.insert(model)
