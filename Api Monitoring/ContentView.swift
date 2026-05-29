@@ -14,6 +14,8 @@ struct ContentView: View {
     
     @Query var urls: [UrlModel]
     
+    @State public var selectedUrlModel: UrlModel?
+    
     @Environment(\.modelContext) private var modelContext
     
     var body: some View {
@@ -70,8 +72,11 @@ struct ContentView: View {
             .navigationSplitViewColumnWidth(min: 260, ideal: 260, max: 260)
         }, detail: {
             HStack {
-                VStack {
-                    TableContentView()
+                HStack {
+                    TableContentView(selectedUrlModel: $selectedUrlModel)
+                        .frame(maxWidth: .infinity)
+                    PingChartView(urlModel: selectedUrlModel)
+                        .frame(width: 550)
                 }
                 .toolbar {
                     ToolbarItem(placement: .navigation) {

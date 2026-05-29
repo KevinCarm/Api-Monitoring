@@ -16,9 +16,15 @@ struct TableContentView: View {
     @Environment(\.modelContext) private var modelContext
 
     @State private var apiCallUtil: ApiCallUtil?
+    @State private var selectedUrlId: PersistentIdentifier?
+    @Binding var selectedUrlModel: UrlModel?
+    
+    private var selectedUrl: UrlModel? {
+        urls.first(where: { $0.id == selectedUrlId })
+    }
     
     var body: some View {
-        Table(urls) {
+        Table(urls, selection: $selectedUrlId) {
             TableColumn("Name") { url in
                 HStack(spacing: 10) {
                     Button {
@@ -110,6 +116,13 @@ struct TableContentView: View {
                 }
             }
         }
+        .onChange(of: selectedUrlId) {_, newID in
+            if let newID = newID,
+                let model = urls.first(where: { $0.id == newID }) {
+                    print("Hiciste clic en la URL: \(model.url)")
+                    selectedUrlModel = model
+            }
+        }
         .onAppear {
             let container = modelContext.container
             let apiCallUtil = ApiCallUtil(modelContainer: container)
@@ -151,5 +164,5 @@ struct TableContentView: View {
         let container = try! ModelContainer(for: UrlModel.self, configurations: config)
     let url = UrlModel(name: "Pokemon Api", url: "https://pokeapi.co/api/v2/pokemon/ditto", interval: 1.0, lastStatus: .Up, note: "")
     container.mainContext.insert(url)
-    return TableContentView().modelContainer(container)
+    return TableContentView(selectedUrlModel: .constant(url)).modelContainer(container)
 }
