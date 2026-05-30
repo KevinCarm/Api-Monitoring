@@ -15,6 +15,7 @@ struct ContentView: View {
     @Query var urls: [UrlModel]
     
     @State public var selectedUrlModel: UrlModel?
+    @State public var isShowingChart: Bool = false
     
     @Environment(\.modelContext) private var modelContext
     
@@ -73,10 +74,13 @@ struct ContentView: View {
         }, detail: {
             HStack {
                 HStack {
-                    TableContentView(selectedUrlModel: $selectedUrlModel)
+                    TableContentView(selectedUrlModel: $selectedUrlModel, isShowingChart: $isShowingChart)
                         .frame(maxWidth: .infinity)
-                    PingChartView(urlModel: selectedUrlModel)
-                        .frame(width: 550)
+                    if isShowingChart {
+                        PingChartView(urlModel: selectedUrlModel)
+                            .frame(width: 550)
+                            .transition(.move(edge: .trailing).combined(with: .opacity))
+                    }
                 }
                 .toolbar {
                     ToolbarItem(placement: .navigation) {
