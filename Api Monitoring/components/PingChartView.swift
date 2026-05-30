@@ -79,7 +79,8 @@ struct PingChartView: View {
             .chartXAxisLabel(position: .bottom, alignment: .center) {
                 Text("Time").font(.caption).foregroundColor(.secondary)
             }
-            .chartYScale(domain: 0...(pings.map { $0.latency }.max() ?? 50.0) * 0.5)
+            .chartYScale(domain: 0...(pings.map { $0.latency }.max() ?? 50.0) * 1.2)
+            .chartXScale(domain: (pingsOrdered.first?.timestamp ?? Date())...(pingsOrdered.last?.timestamp ?? Date()))
             .frame(height: 180)
             .onAppear {
                 withAnimation(.easeOut(duration: 1.5)) {
