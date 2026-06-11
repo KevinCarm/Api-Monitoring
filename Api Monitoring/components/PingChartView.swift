@@ -16,6 +16,8 @@ struct PingChartView: View {
     
     @State private var animating: Bool = false
     
+    private var urlModel: UrlModel?
+    
     private let colorArea = LinearGradient(
         gradient: Gradient(colors: [
             Color.green.opacity(0.5),
@@ -26,6 +28,7 @@ struct PingChartView: View {
         )
     
     init(urlModel: UrlModel?) {
+        self.urlModel = urlModel
         let urlId = urlModel?.persistentModelID
         var descriptor = FetchDescriptor<PingRecord>(
             predicate: #Predicate { $0.urlModel?.persistentModelID == urlId },
@@ -40,6 +43,59 @@ struct PingChartView: View {
         let pingsOrdered = pings.reversed()
         
         VStack(alignment: .leading) {
+            HStack {
+                Image(systemName: "network")
+                    .resizable()
+                    .scaledToFit()
+                    .padding(3)
+                    .frame(width: 50, height: 50)
+                    .foregroundStyle(.blue)
+                    .background(
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(.blue.opacity(0.2))
+                    )
+                VStack {
+                    Text(urlModel!.name)
+                        .font(.title2.bold())
+                    HStack {
+                        let upImage = Image(systemName: "circle.fill")
+                            .foregroundStyle(.green)
+                        let warningImage = Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundStyle(.yellow)
+                        let downImage = Image(systemName: "x.circle.fill")
+                            .foregroundStyle(.red)
+                        let pauseImage = Image(systemName: "pause.fill")
+                            .foregroundStyle(.gray)
+                        
+                        switch(urlModel!.lastStatus) {
+                        case .Up:
+                            upImage
+                        case .Warning:
+                            warningImage
+                        case .Down:
+                            downImage
+                        case .Pause:
+                            pauseImage
+                        }
+                        Text(urlModel!.lastStatus.rawValue)
+                    }
+                    .padding(.horizontal, 10)
+                    .frame(height: 25)
+                    .background(
+                        RoundedRectangle(cornerRadius: 6)
+                            .fill(
+                                urlModel!.lastStatus == .Up ? .green
+                                    .opacity(
+                                        0.2
+                                    ) : urlModel!.lastStatus == .Warning ? .yellow.opacity(
+                                        0.2
+                                    )
+                                : .red.opacity(0.2)
+                                )
+                    )
+                }.padding()
+            }
+            Divider()
             Text("Latency (ms)")
                 .font(.subheadline)
                 .fontWeight(.medium)
@@ -96,5 +152,13 @@ struct PingChartView: View {
 }
 
 #Preview {
-    PingChartView(urlModel: UrlModel(name: "", url: "", interval: 0.0, lastStatus: .Down, note: ""))
+    PingChartView(
+        urlModel: UrlModel(
+            name: "Poke Api",
+            url: "",
+            interval: 0.0,
+            lastStatus: .Up,
+            note: ""
+        )
+    )
 }
