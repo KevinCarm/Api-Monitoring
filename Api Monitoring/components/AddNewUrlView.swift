@@ -40,7 +40,7 @@ struct AddNewUrlView: View {
         
                 HStack {
                     Text("Interval")
-                    Slider(value: $interval, in: 0...300, step: 1)
+                    Slider(value: $interval, in: 0...100, step: 1)
                         .tint(.purple)
                         .controlSize(.small)
                         .cornerRadius(4)
@@ -66,7 +66,7 @@ struct AddNewUrlView: View {
                 Button("Save") {
                     let model = UrlModel(
                         name: name,
-                        url: urlString,
+                        url: urlString.trimmingCharacters(in: .whitespacesAndNewlines),
                         interval: interval,
                         lastStatus: .Up,
                         note: description

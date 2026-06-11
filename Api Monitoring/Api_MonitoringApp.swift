@@ -8,6 +8,11 @@
 import SwiftUI
 import SwiftData
 
+@MainActor class GlobalApiManager {
+    static let shared = GlobalApiManager()
+    var util: ApiCallUtil?
+}
+
 @main
 struct Api_MonitoringApp: App {
     let container: ModelContainer
@@ -15,6 +20,9 @@ struct Api_MonitoringApp: App {
     init() {
         do {
             container = try ModelContainer(for: UrlModel.self)
+            GlobalApiManager.shared.util = ApiCallUtil(
+                modelContainer: container
+            )
         } catch {
             
             let urls = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)

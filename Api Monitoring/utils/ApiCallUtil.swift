@@ -11,16 +11,22 @@ import SwiftData
 @ModelActor actor ApiCallUtil {
     private var activeTasks: [String: Task<Void, Never>] = [:]
     
-    func startMonitoringApi(for urlString: String, each seconds: Double, method: String) {
-        print(urlString)
-        stopMonitoring(for: urlString)
+    func startMonitoringApi(for urlString: String, each seconds: Double, method: String) async {
+        let cleanKey = urlString.trimmingCharacters(in: .whitespacesAndNewlines)
+        print(cleanKey)
+        if let existTask = activeTasks[cleanKey] {
+            existTask.cancel()
+        }
+        await stopMonitoring(for: cleanKey)
+        await Task.yield()
         
-        let newTask = Task {
-            guard let url = URL(string: urlString) else { return }
+        let newTask = Task { [cleanKey] in
+            guard let url = URL(string: cleanKey) else { return }
             var request = URLRequest(url: url)
             request.httpMethod = method
             
             while !Task.isCancelled {
+                if Task.isCancelled { break }
                 do {
                     let startTime = Date()
                     let (_, response) = try await URLSession.shared.data(for: request)
@@ -30,23 +36,32 @@ import SwiftData
                     let latencyMill = latencySeg * 1000
                     print(urlString)
                     print("\(latencyMill)ms")
-                    self.updateUrlData(url: urlString, status: status, latency: Int(latencyMill))
+                    if Task.isCancelled { break }
+                    await updateUrlData(
+                        url: cleanKey,
+                        status: status,
+                        latency: Int(latencyMill)
+                    )
                     try await Task.sleep(for: .seconds(seconds))
                 } catch {
-                    break
+                    if error is CancellationError || Task.isCancelled {
+                        break
+                    }
+                    if !Task.isCancelled {
+                        try? await Task.sleep(for: .seconds(seconds))
+                    }
                 }
             }
         }
-        activeTasks[urlString] = newTask
+        activeTasks[cleanKey] = newTask
     }
     
-    private func updateUrlData(url: String, status: Int, latency: Int) {
+    private func updateUrlData(url: String, status: Int, latency: Int) async {
         let context = modelContext
         
         let descriptor = FetchDescriptor<UrlModel>(
             predicate: #Predicate { $0.url == url }
         )
-        
         do {
             if let existData = try context.fetch(descriptor).first {
                 var statusEnum: Status? = .Down
@@ -88,12 +103,17 @@ import SwiftData
     }
     
     
-    func stopMonitoring(for url: String) {
-        activeTasks[url]?.cancel()
-        activeTasks.removeValue(forKey: url)
+    func stopMonitoring(for url: String) async {
+        let cleanKey = url.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let task = activeTasks.removeValue(forKey: cleanKey) else {
+            return
+        }
+        print("Stopping...")
+        task.cancel()
+        _ = await task.result
     }
     
-    func deleteTask(for url: String) {
+    func deleteTask(for url: String) async {
         print(url)
         activeTasks[url]?.cancel()
         activeTasks.removeValue(forKey: url)
@@ -111,7 +131,7 @@ import SwiftData
         }
     }
     
-    func stopAllTasks() {
+    func stopAllTasks() async {
         for task in activeTasks.values {
             if !task.isCancelled {
                 task.cancel()

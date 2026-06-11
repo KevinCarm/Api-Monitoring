@@ -15,11 +15,17 @@ struct TableContentView: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.modelContext) private var modelContext
 
-    @State private var apiCallUtil: ApiCallUtil?
     @State private var selectedUrlId: PersistentIdentifier?
     
     @Binding var selectedUrlModel: UrlModel?
     @Binding var isShowingChart: Bool
+    
+    private var apiCallUtil: ApiCallUtil {
+        guard let util = GlobalApiManager.shared.util else {
+            fatalError("El ApiCallUtil global no fue inicializado en App.swift")
+        }
+        return util
+    }
     
     private var selectedUrl: UrlModel? {
         urls.first(where: { $0.id == selectedUrlId })
@@ -30,7 +36,9 @@ struct TableContentView: View {
             TableColumn("Name") { url in
                 HStack(spacing: 10) {
                     Button {
-                        updateIsRunning(url: url.url)
+                        Task {
+                            await updateIsRunning(url: url.url)
+                        }
                     } label: {
                         Image(systemName: url.isRunning ? "pause.fill" : "play.fill")
                             .foregroundStyle(.green)
@@ -109,7 +117,7 @@ struct TableContentView: View {
                     Spacer()
                     Button {
                         Task {
-                            await apiCallUtil?.deleteTask(for: url.url)
+                            await apiCallUtil.deleteTask(for: url.url)
                             print("Deleted")
                         }
                     } label: {
@@ -128,39 +136,35 @@ struct TableContentView: View {
                 }
             }
         }
-        .onAppear {
-            let container = modelContext.container
-            let apiCallUtil = ApiCallUtil(modelContainer: container)
-            self.apiCallUtil = apiCallUtil
-        }
     }
     
-    private func updateIsRunning(url: String) {
+    @MainActor private func updateIsRunning(url: String) async {
+        let cleanedUr = url.trimmingCharacters(in: .whitespacesAndNewlines)
+
         let context = modelContext
-        
         let descriptor = FetchDescriptor<UrlModel>(
-            predicate: #Predicate { $0.url == url}
-        )
-        if let exists = try? context.fetch(descriptor).first {
-            print(exists.isRunning)
-            if exists.isRunning {
-                exists.isRunning = false
-                Task {
-                    await apiCallUtil?.stopMonitoring(for: url)
-                }
-            } else {
-                exists.isRunning = true
-                Task {
-                    await apiCallUtil?
-                        .startMonitoringApi(
-                            for: url,
-                            each: exists.interval,
-                            method: "GET"
-                        )
-                }
+            predicate: #Predicate {
+                $0.url == cleanedUr
             }
-            try? context.save()
+        )
+        guard let exists = try? context.fetch(descriptor).first else {
+            return
         }
+
+        let util = apiCallUtil
+        if exists.isRunning {
+            await util.stopMonitoring(for: cleanedUr)
+            exists.isRunning = false
+        } else {
+            exists.isRunning = true
+
+            await util.startMonitoringApi(
+                for: cleanedUr,
+                each: exists.interval,
+                method: "GET"
+            )
+        }
+        try? context.save()
     }
 }
 
